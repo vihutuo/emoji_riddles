@@ -11,7 +11,7 @@ def main(page: ft.Page):
       "Roberto": "Roboto-Black.ttf"
   }
   
-  page.title = "Emoji Enigma"
+  page.title = "Emoji Riddles"
   page.theme_mode = "light"
   page.theme =ft.Theme(color_scheme_seed="green")
 
