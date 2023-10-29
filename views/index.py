@@ -9,10 +9,10 @@ import mymodules.user_emoji_item
 import time
 
 
-def IndexView(page, params):
+def IndexView(page:ft.Page, params):
   def SaveAllData():
     data = lst_py_user_emoji_items.model_dump()
-    print("Data Saved")
+    #print("Data Saved")
     page.client_storage.set("lshss.emoji.user_emoji_items", data)
     
   def LoadAllData():
@@ -23,8 +23,8 @@ def IndexView(page, params):
           #  print("data",data)
             lst_py_user_emoji_items = mymodules.user_emoji_item.ListUserEmojiItem(**data) 
             #print("user_emoji_items",user_emoji_items)
-            print("Data Loaded")  
-            print("Count items", len(lst_py_user_emoji_items.items))
+            #print("Data Loaded")
+            #print("Count items", len(lst_py_user_emoji_items.items))
           except Exception as error:
             print("Error loading save data",error)
             lst_py_user_emoji_items = mymodules.user_emoji_item.ListUserEmojiItem() 
@@ -91,15 +91,21 @@ def IndexView(page, params):
        
        
   def disable_word_letter(letter):
-     for x in  row_word_letters.controls:
+      ue = get_current_user_emoji_item()
+
+      if ue.is_complete:
+          print("Complete")
+          return
+
+      for x in  row_word_letters.controls:
        
-       if x.text == letter and x.disabled==False:
-         #print(f"{x.text=}")
-         x.disabled = True
-         x.text = ""
-         #x.opacity = 0
-         x.update()
-         break
+           if x.text == letter and x.disabled==False:
+             #print(f"{x.text=}")
+             x.disabled = True
+             x.text = ""
+             #x.opacity = 0
+             x.update()
+             break
        
   def hint_clicked(e):
     if hints_remaining >0:
@@ -113,7 +119,7 @@ def IndexView(page, params):
         if x == "\n" or x == " ":
           unrevealed_positions.remove(i)
           
-      print(type(unrevealed_positions))
+      #print(type(unrevealed_positions))
       reveal_count = 2
       if len(unrevealed_positions) < reveal_count:
         reveal_count= len(unrevealed_positions)
@@ -281,19 +287,19 @@ def IndexView(page, params):
     CreateUserLetterBoxes(correct_answer)
     
     if  user_emoji_items[selected_ind].is_complete:
-       row_word_letters.update()
+       #row_word_letters.update()
        hint_btn.disabled = True
-       hint_btn.update()
+       #hint_btn.update()
     else:  
        CreateWordLetterBoxes(correct_answer)
        hint_btn.disabled = False
-       hint_btn.update()
+       #hint_btn.update()
       
     update_all_user_letters(False)
 
     txt_hint_text.opacity = 0
     txt_hint_text.value = hint
-    txt_hint_text.update()
+    #txt_hint_text.update()
     print("Correct Answer",correct_answer)
     page.update()
     
@@ -390,4 +396,6 @@ def IndexView(page, params):
   page.update()
   
   print(page)
+  print("ClientIP",page.client_ip)
+
   NewGame()
