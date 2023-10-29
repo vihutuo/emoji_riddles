@@ -71,7 +71,7 @@ def IndexView(page, params):
     for x in user_letters:
       return_user_letter(x)
       
-  def update_all_user_letters():
+  def update_all_user_letters(update=True):
      return_all_user_letters()
      do_update= False
      for i in  range(len(user_letters)):
@@ -86,7 +86,7 @@ def IndexView(page, params):
              #print("Remove",correct_answer[i])
              #user_letters[i].update()
              
-     if do_update:
+     if do_update and update:
        row_user_letters.update()
        
        
@@ -117,8 +117,8 @@ def IndexView(page, params):
       reveal_count = 2
       if len(unrevealed_positions) < reveal_count:
         reveal_count= len(unrevealed_positions)
-      print(f"{unrevealed_positions=}")
-      print(f"{reveal_count=}")
+      #print(f"{unrevealed_positions=}")
+      #print(f"{reveal_count=}")
       hint_positions = random.sample(sorted(unrevealed_positions),reveal_count)
       
       for x in hint_positions:
@@ -216,7 +216,7 @@ def IndexView(page, params):
                               shape=ft.RoundedRectangleBorder(radius=20), 
                               padding=3))
         row_word_letters.controls.append(btn_1)  
-    row_word_letters.update()
+    #row_word_letters.update()
       
   def CreateUserLetterBoxes(word):
     length = len(word)
@@ -266,7 +266,7 @@ def IndexView(page, params):
        
         user_letters.append(btn_1)
     row_user_letters.controls.append(r)
-    row_user_letters.update()
+    #row_user_letters.update()
       
   def restart_clicked(e):
     NewGame()
@@ -289,13 +289,13 @@ def IndexView(page, params):
        hint_btn.disabled = False
        hint_btn.update()
       
-    update_all_user_letters()
+    update_all_user_letters(False)
 
     txt_hint_text.opacity = 0
     txt_hint_text.value = hint
     txt_hint_text.update()
-    #print(correct_answer)
-    #page.update()
+    print("Correct Answer",correct_answer)
+    page.update()
     
     
   def LoadNewImage():
