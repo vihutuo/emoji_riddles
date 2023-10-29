@@ -15,4 +15,10 @@ class UserEmojiItem(BaseModel):
     self.word_letters = s[:]
 class ListUserEmojiItem(BaseModel):
       items: list[UserEmojiItem] = []
+      def __init__(self,n):
+        super().__init__()
+        for x in range(n):
+          self.items.append(UserEmojiItem())
+
+
     

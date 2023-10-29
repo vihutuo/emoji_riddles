@@ -1,3 +1,4 @@
+import os
 import flet as ft
 import random
 import string
@@ -5,29 +6,54 @@ import mymodules.emoji as emoji
 import mymodules.utils as utils
 import mymodules.item_navigator
 import mymodules.user_emoji_item
+import mymodules.analytics
+from dotenv import load_dotenv
 
-import time
 
 
 def IndexView(page:ft.Page, params):
+  def reset_save_data():
+      if page.client_storage.contains_key("lshss.emoji.user_emoji_items"):
+              page.client_storage.remove("lshss.emoji.user_emoji_items")
+              print("Save data gone")
+      if page.client_storage.contains_key("lshss.emoji.score"):
+              page.client_storage.remove("lshss.emoji.score")
+      LoadAllData()
   def SaveAllData():
-    data = lst_py_user_emoji_items.model_dump()
-    #print("Data Saved")
-    page.client_storage.set("lshss.emoji.user_emoji_items", data)
-    
+        data = lst_py_user_emoji_items.model_dump()
+        # print("Data Saved")
+        page.client_storage.set("lshss.emoji.user_emoji_items", data)
+        page.client_storage.set("lshss.emoji.score", score)
+
+  def LoadScore():
+      nonlocal score
+      if page.client_storage.contains_key("lshss.emoji.score"):
+          try :
+              score = int(page.client_storage.get("lshss.emoji.score"))
+          except Exception as error:
+              score = 0
   def LoadAllData():
       nonlocal lst_py_user_emoji_items
+      nonlocal  user_emoji_items
+      LoadScore()
       if page.client_storage.contains_key("lshss.emoji.user_emoji_items"):
           try:
             data=page.client_storage.get("lshss.emoji.user_emoji_items")
           #  print("data",data)
-            lst_py_user_emoji_items = mymodules.user_emoji_item.ListUserEmojiItem(**data) 
+            lst_py_user_emoji_items = mymodules.user_emoji_item.ListUserEmojiItem(**data)
+            user_emoji_items = lst_py_user_emoji_items.items
             #print("user_emoji_items",user_emoji_items)
             #print("Data Loaded")
             #print("Count items", len(lst_py_user_emoji_items.items))
           except Exception as error:
             print("Error loading save data",error)
-            lst_py_user_emoji_items = mymodules.user_emoji_item.ListUserEmojiItem() 
+            lst_py_user_emoji_items = mymodules.user_emoji_item.ListUserEmojiItem(len(lst_images))
+            user_emoji_items = lst_py_user_emoji_items.items
+
+      else:
+            print("Loading fresh ")
+            lst_py_user_emoji_items = mymodules.user_emoji_item.ListUserEmojiItem(len(lst_images))
+            user_emoji_items = lst_py_user_emoji_items.items
 
 
   def GameOver():
@@ -140,12 +166,10 @@ def IndexView(page:ft.Page, params):
       
       
   def check_answer():
-    
      
     e=get_current_user_emoji_item()
     if e.is_complete:
        return
-      
     i=0
     for x in user_letters:
        
@@ -154,6 +178,9 @@ def IndexView(page:ft.Page, params):
        
        i+=1    
     #Won
+    nonlocal score
+    score += 1
+    analytics.UpdateMatch(score)
     e.is_complete = True
     for x in user_letters:
        x.style.bgcolor  = ft.colors.PRIMARY
@@ -176,7 +203,11 @@ def IndexView(page:ft.Page, params):
     return_user_letter(e.control)
      
   def word_letter_box_clicked(e):
+
     alphabet = e.control.text
+
+
+
     if alphabet != "":
       for x in  user_letters:
        if x.text == "" and x.disabled == False:
@@ -275,7 +306,8 @@ def IndexView(page:ft.Page, params):
     #row_user_letters.update()
       
   def restart_clicked(e):
-    NewGame()
+      reset_save_data()
+    #ewGame()
   def NewGame():
     nonlocal is_game_over
     is_game_over= False
@@ -312,28 +344,22 @@ def IndexView(page:ft.Page, params):
     file_name = lst_images[selected_ind][0]
     correct_answer = lst_images[selected_ind][1].upper()
     hint = lst_images[selected_ind][2].title()
-    
-   
     txt_emote.value = file_name
     txt_emote.update()
-    #print("New quetion loaded")
+    #print("New question loaded")
       
   #####Game variables
-  lst_images =emoji.GetAllEmotes()
+  lst_images = emoji.GetAllEmotes()
   #page.client_storage.remove("lshss.emoji.user_emoji_items")
 
-  lst_py_user_emoji_items  = mymodules.user_emoji_item.ListUserEmojiItem()
-  
+  lst_py_user_emoji_items = None
+  user_emoji_items = None
+  score = 0
   LoadAllData()
-  user_emoji_items = lst_py_user_emoji_items.items
-  if user_emoji_items == []:
-      #print("EMPTY")
-      for x in lst_images :
-        user_emoji_items.append(mymodules.user_emoji_item.UserEmojiItem())
-  #print(user_emoji_items)
+
   user_letters = []
-  #all_emotes = emoji.GetAllEmotes()
   selected_ind = 0
+
   correct_answer = ""
   is_game_over = False
   hint=""
@@ -394,8 +420,18 @@ def IndexView(page:ft.Page, params):
             )
 
   page.update()
-  
+  load_dotenv()
+  analytics = mymodules.analytics.Analytics(3,
+                                            os.getenv('salt'),
+                                            os.getenv('pepper'),
+                                            os.getenv('analytics_domain'),
+                                            os.getenv('this_domain')
+                                            )
+  analytics.StartSession(page.client_ip,page.client_user_agent, "",page.platform,page.session_id)
+  analytics_match_started = False
+  analytics.StartMatch("")
+
   print(page)
-  print("ClientIP",page.client_ip)
+  print("ClientID",page.client_ip)
 
   NewGame()

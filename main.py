@@ -15,6 +15,8 @@ def main(page: ft.Page):
   page.theme_mode = "light"
   page.theme =ft.Theme(color_scheme_seed="green")
 
+
+
   def route_change(route):
     page.views.clear()
     troute = ft.TemplateRoute(page.route)
@@ -35,5 +37,7 @@ def main(page: ft.Page):
   page.go(page.route)
 
 
+
 #ft.app(target=main, assets_dir="assets",use_color_emoji=True)
 ft.app(target=main, assets_dir="assets",use_color_emoji=True,view=ft.AppView.WEB_BROWSER)
+
