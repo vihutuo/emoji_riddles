@@ -20,7 +20,7 @@ def QuestionView(page:ft.Page,params):
   txt_letter1 = ft.Text("A",text_align=ft.TextAlign.CENTER,size=22)
   str = (f"Values\n :  {page.url=}"
          f"\n{page.client_ip=}"
-         f"\nsalt={os.getenv('salt')}"
+
          )
   txt_status = ft.Text(str, text_align=ft.TextAlign.CENTER, size=22)
 
