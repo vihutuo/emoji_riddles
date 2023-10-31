@@ -1,7 +1,5 @@
 import flet as ft
 class ItemNavigator(ft.UserControl):
-  
-      
   def __init__(self, start,stop,current,on_change_item):
       super().__init__()
       self.start=start
@@ -38,30 +36,29 @@ class ItemNavigator(ft.UserControl):
     if self.current >= self.stop :
         self.btn_next.disabled = True
        
-  def previous_clicked(self, e):
+  async def previous_clicked(self, e):
     if self.current>self.start:
        self.current-=1
     self.EnableDisableButtons() 
     self.txt_question_no.value = f"{self.current}/{self.stop}"
-    self.update()
-    self.on_change_item(e)
+    await self.update_async()
+    await self.on_change_item(e)
      
-  def move_next(self):
+  async def move_next(self):
     if self.current<self.stop:
        self.current+=1
        self.EnableDisableButtons() 
        print("Next Clicked")
        self.txt_question_no.value = f"{self.current}/{self.stop}"
-       self.txt_question_no.update()
-       self.update()
-       self.on_change_item(self)
+       await self.txt_question_no.update_async()
+       await self.update_async()
+       await self.on_change_item(self)
        return True
     else:
        return False
-      
-    
-  def next_clicked(self, e):
-     self.move_next()
+
+  async def next_clicked(self, e):
+     await self.move_next()
      #if self.current<self.stop:
      # self.current+=1
      #self.EnableDisableButtons() 
@@ -70,7 +67,6 @@ class ItemNavigator(ft.UserControl):
      #self.txt_question_no.update()
      #self.update()
      #self.on_change_item(e)
-     
 
   def build(self):
      # print("In Build")

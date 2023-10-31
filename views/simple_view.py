@@ -1,9 +1,9 @@
 import flet as ft
-def SimpleView(page,params):
-  def submit_clicked(e):
+async def SimpleView(page:ft.Page,params):
+  async def submit_clicked(e):
        
        col_1.controls.append( ft.Text(fld_name.value))
-       col_1.update()
+       await col_1.update_async()
   
   fld_name = ft.TextField(label="Enter name")
   btn_submit = ft.ElevatedButton("Submit",on_click=submit_clicked)
@@ -11,5 +11,5 @@ def SimpleView(page,params):
   row1 = ft.Row(controls=[fld_name,btn_submit])
   col_1 = ft.Column()
   page.views.append(ft.View("/",[appbar,row1,col_1]))
-  page.update()
+  await page.update_async()
     

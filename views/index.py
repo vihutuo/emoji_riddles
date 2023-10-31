@@ -7,38 +7,84 @@ import mymodules.utils as utils
 import mymodules.item_navigator
 import mymodules.user_emoji_item
 import mymodules.analytics
+import mymodules.print_debug
+import pendulum
 from dotenv import load_dotenv
+import json
 
+async def IndexView(page:ft.Page, params):
+  def get_high_score_table(json_data):
+      data = json_data
+      tbl = ft.DataTable(columns=[
+                                ft.DataColumn(ft.Text("Name")),
+                                ft.DataColumn(ft.Text("Score"),numeric=True),
+                                ft.DataColumn(ft.Text("Date")),
+                            ],
+                            rows=[]
+                        )
+      for item in data:
+          try:
+            end_time = pendulum.parse(item["end_time"]).to_formatted_date_string()
+          except Exception:
+              end_time = ""
 
+          tbl.rows.append(ft.DataRow(
+                       cells=[
+                            ft.DataCell(ft.Text(item["player_name"])),
+                            ft.DataCell(ft.Text(item["score"])),
+                            ft.DataCell(ft.Text(str(end_time))),
+                            ]))
+      return tbl
 
-def IndexView(page:ft.Page, params):
-  def reset_save_data():
-      if page.client_storage.contains_key("lshss.emoji.user_emoji_items"):
-              page.client_storage.remove("lshss.emoji.user_emoji_items")
-              print("Save data gone")
-      if page.client_storage.contains_key("lshss.emoji.score"):
-              page.client_storage.remove("lshss.emoji.score")
-      LoadAllData()
-  def SaveAllData():
+  async def page_on_connect(e):
+      await print_bug.print_msg("Session connect")
+
+  async def page_on_disconnect(e):
+      await print_bug.print_msg("Session disconnect")
+
+  async def page_on_close(e):
+      await print_bug.print_msg("Session Close")
+
+  async def page_on_error(e):
+      await print_bug.print_msg(str(e))
+
+  async def reset_save_data():
+      if await page.client_storage.contains_key_async("lshss.emoji.user_emoji_items"):
+          await page.client_storage.remove_async("lshss.emoji.user_emoji_items")
+          print("Save data gone")
+      if await page.client_storage.contains_key_async("lshss.emoji.score"):
+          await page.client_storage.remove_async("lshss.emoji.score")
+      await LoadAllData()
+
+  async def SaveAllData():
+        return
         data = lst_py_user_emoji_items.model_dump()
         # print("Data Saved")
-        page.client_storage.set("lshss.emoji.user_emoji_items", data)
-        page.client_storage.set("lshss.emoji.score", score)
+        await page.client_storage.set_async("lshss.emoji.user_emoji_items", data)
+        await page.client_storage.set_async("lshss.emoji.score", score)
 
-  def LoadScore():
+  async def LoadScore():
       nonlocal score
-      if page.client_storage.contains_key("lshss.emoji.score"):
+      score = 0
+      return
+      if await page.client_storage.contains_key_async("lshss.emoji.score"):
           try :
-              score = int(page.client_storage.get("lshss.emoji.score"))
+              score = int(await page.client_storage.get_async("lshss.emoji.score"))
           except Exception as error:
               score = 0
-  def LoadAllData():
+  async def LoadAllData():
       nonlocal lst_py_user_emoji_items
       nonlocal  user_emoji_items
-      LoadScore()
-      if page.client_storage.contains_key("lshss.emoji.user_emoji_items"):
+
+      lst_py_user_emoji_items = mymodules.user_emoji_item.ListUserEmojiItem()
+      lst_py_user_emoji_items.FillEmptyItems(len(lst_images))
+      user_emoji_items = lst_py_user_emoji_items.items
+      return
+
+      await LoadScore()
+      if await page.client_storage.contains_key_async("lshss.emoji.user_emoji_items"):
           try:
-            data=page.client_storage.get("lshss.emoji.user_emoji_items")
+            data=await page.client_storage.get_async("lshss.emoji.user_emoji_items")
           #  print("data",data)
             lst_py_user_emoji_items = mymodules.user_emoji_item.ListUserEmojiItem(**data)
             user_emoji_items = lst_py_user_emoji_items.items
@@ -47,22 +93,23 @@ def IndexView(page:ft.Page, params):
             #print("Count items", len(lst_py_user_emoji_items.items))
           except Exception as error:
             print("Error loading save data",error)
-            lst_py_user_emoji_items = mymodules.user_emoji_item.ListUserEmojiItem(len(lst_images))
+            lst_py_user_emoji_items = mymodules.user_emoji_item.ListUserEmojiItem()
+            lst_py_user_emoji_items.FillEmptyItems(len(lst_images))
             user_emoji_items = lst_py_user_emoji_items.items
 
       else:
             print("Loading fresh ")
-            lst_py_user_emoji_items = mymodules.user_emoji_item.ListUserEmojiItem(len(lst_images))
+            lst_py_user_emoji_items = mymodules.user_emoji_item.ListUserEmojiItem()
+            lst_py_user_emoji_items.FillEmptyItems(len(lst_images))
             user_emoji_items = lst_py_user_emoji_items.items
 
-
-  def GameOver():
+  async def GameOver():
     #WON
-    def close_dlg(e):
+    async def close_dlg(e):
         dlg_modal.open = False
-        nav_items.move_next()
+        await nav_items.move_next()
         
-        page.update()
+        await page.update_async()
       
     nonlocal  is_game_over
     is_game_over = True
@@ -78,66 +125,62 @@ def IndexView(page:ft.Page, params):
     page.dialog = dlg_modal
     dlg_modal.open = True
     
-    page.update()
+    await page.update_async()
     
-  def on_nav_change_item(e):
+  async def on_nav_change_item(e):
     nonlocal selected_ind
     selected_ind = nav_items.current-1
-    SaveAllData()
-    NewGame()
+    await SaveAllData()
+    await NewGame()
     #print(f"{nav_items.current=}")
   
   def get_current_user_emoji_item():
     return user_emoji_items[selected_ind]
   
-  def return_all_user_letters():
+  async def return_all_user_letters():
     if get_current_user_emoji_item().is_complete:
       return
       
     for x in user_letters:
-      return_user_letter(x)
+      await return_user_letter(x)
       
-  def update_all_user_letters(update=True):
-     return_all_user_letters()
+  async def update_all_user_letters(update=True):
+     await return_all_user_letters()
      do_update= False
      for i in  range(len(user_letters)):
          if i in user_emoji_items[selected_ind].hint_positions:
            if user_letters[i].text != correct_answer[i]:
-             disable_word_letter(correct_answer[i])   
+             await disable_word_letter(correct_answer[i])
              
              #return_user_letter(user_letters[i]) 
              do_update=True
              user_letters[i].disabled = True
              user_letters[i].text = correct_answer[i]
              #print("Remove",correct_answer[i])
-             #user_letters[i].update()
+             #user_letters[i].update_async()
              
      if do_update and update:
-       row_user_letters.update()
+       await row_user_letters.update_async()
        
-       
-  def disable_word_letter(letter):
+  async def disable_word_letter(letter):
       ue = get_current_user_emoji_item()
-
       if ue.is_complete:
           print("Complete")
           return
-
-      for x in  row_word_letters.controls:
-       
-           if x.text == letter and x.disabled==False:
+      for x in row_word_letters.controls:
+          if x.text == letter and not x.disabled:
              #print(f"{x.text=}")
              x.disabled = True
              x.text = ""
              #x.opacity = 0
-             x.update()
+             await x.update_async()
              break
        
-  def hint_clicked(e):
+  async def hint_clicked(e):
     if hints_remaining >0:
       old_hint_positions = user_emoji_items[selected_ind].hint_positions
       #print(f"{old_hint_positions=}")
-      set_old_hints  = set(old_hint_positions)
+      set_old_hints = set(old_hint_positions)
       unrevealed_positions = set_old_hints.symmetric_difference(range(0,len(correct_answer)))
       #remove white spaces from unrevealed_positions
       for i,x in enumerate(correct_answer):
@@ -156,78 +199,67 @@ def IndexView(page:ft.Page, params):
       for x in hint_positions:
         old_hint_positions.append(x)
         
-      update_all_user_letters()
+      await update_all_user_letters()
       #print("Hint positions",user_emoji_items[selected_ind].hint_positions)
 
       if txt_hint_text.opacity == 0:
         txt_hint_text.opacity = 1
-        txt_hint_text.update()
-      check_answer()
+        await txt_hint_text.update_async()
+      await check_answer()
       
-      
-  def check_answer():
-     
-    e=get_current_user_emoji_item()
+  async def check_answer():
+    e = get_current_user_emoji_item()
     if e.is_complete:
        return
-    i=0
+    i = 0
     for x in user_letters:
-       
        if x.text != correct_answer[i] or x.text == "":
          return
-       
-       i+=1    
+       i += 1
     #Won
     nonlocal score
     score += 1
     analytics.UpdateMatch(score)
     e.is_complete = True
     for x in user_letters:
-       x.style.bgcolor  = ft.colors.PRIMARY
-       x.update()
+       x.style.bgcolor = ft.colors.PRIMARY
+       await x.update_async()
     #GameOver()     
      
-  def return_user_letter(letter_ctrl):
+  async def return_user_letter(letter_ctrl):
     alphabet = letter_ctrl.text
     if alphabet!="" and not letter_ctrl.disabled :
        letter_ctrl.data.text = alphabet
        #e.control.data.opacity = 1
-       letter_ctrl.data.update()
+       await letter_ctrl.data.update_async()
        letter_ctrl.text = ""
-       letter_ctrl.update()
+       await letter_ctrl.update_async()
        # check_answer()
 
-  def user_letter_box_clicked(e):
+  async def user_letter_box_clicked(e):
     if get_current_user_emoji_item().is_complete:
       return 
-    return_user_letter(e.control)
+    await return_user_letter(e.control)
      
-  def word_letter_box_clicked(e):
-
+  async def word_letter_box_clicked(e):
     alphabet = e.control.text
-
-
-
     if alphabet != "":
       for x in  user_letters:
        if x.text == "" and x.disabled == False:
           x.text = alphabet
           x.data = e.control
-          
-          x.update()
+          await x.update_async()
           e.control.text=""
          # e.control.opacity =0
-          e.control.update()
-          page.update()
+          await e.control.update_async()
+          #page.update()
           #print("Checking",x.text)
-          check_answer()
+          await check_answer()
           break
           
   def CreateWordLetterBoxes(word):
-
     #check if letters were already generated
-    if not user_emoji_items[selected_ind].word_letters :    
-            
+    if not user_emoji_items[selected_ind].word_letters :
           extra_letters = 0
           if len(word)<=8:
             extra_letters = 5
@@ -305,17 +337,41 @@ def IndexView(page:ft.Page, params):
     row_user_letters.controls.append(r)
     #row_user_letters.update()
       
-  def restart_clicked(e):
-      reset_save_data()
-    #ewGame()
-  def NewGame():
+  async def restart_clicked(e):
+      await reset_save_data()
+  async def show_high_scores(e):
+      e.control.disabled=True
+      await e.control.update_async()
+      data = analytics.get_high_scores(10,0)
+      await print_bug.print_msg(data)
+
+      async def close_dlg(e):
+          dlg_modal.open = False
+          await page.update_async()
+      dlg_modal = ft.AlertDialog(
+          modal=True,
+          title=ft.Text("High Scores"),
+          content=get_high_score_table(data),
+          actions=[
+              ft.TextButton("OK", on_click=close_dlg),
+          ],
+          actions_alignment=ft.MainAxisAlignment.CENTER,
+      )
+      page.dialog = dlg_modal
+      dlg_modal.open = True
+      e.control.disabled = False
+      await page.update_async()
+
+
+
+  async def NewGame():
     nonlocal is_game_over
     is_game_over= False
     user_letters.clear()
     row_user_letters.controls.clear()
     row_word_letters.controls.clear()
     hint_count = 0
-    LoadNewImage()
+    await LoadNewImage()
     CreateUserLetterBoxes(correct_answer)
     
     if  user_emoji_items[selected_ind].is_complete:
@@ -327,16 +383,16 @@ def IndexView(page:ft.Page, params):
        hint_btn.disabled = False
        #hint_btn.update()
       
-    update_all_user_letters(False)
+    await update_all_user_letters(False)
 
     txt_hint_text.opacity = 0
     txt_hint_text.value = hint
     #txt_hint_text.update()
     print("Correct Answer",correct_answer)
-    page.update()
+    await page.update_async()
     
     
-  def LoadNewImage():
+  async def LoadNewImage():
     #nonlocal selected_ind
     nonlocal correct_answer
     nonlocal hint
@@ -345,7 +401,7 @@ def IndexView(page:ft.Page, params):
     correct_answer = lst_images[selected_ind][1].upper()
     hint = lst_images[selected_ind][2].title()
     txt_emote.value = file_name
-    txt_emote.update()
+    await txt_emote.update_async()
     #print("New question loaded")
       
   #####Game variables
@@ -355,7 +411,7 @@ def IndexView(page:ft.Page, params):
   lst_py_user_emoji_items = None
   user_emoji_items = None
   score = 0
-  LoadAllData()
+  await LoadAllData()
 
   user_letters = []
   selected_ind = 0
@@ -367,14 +423,17 @@ def IndexView(page:ft.Page, params):
   #img_1 = ft.Image(src="", width=300)
   txt_msg = ft.Text("")
   txt_hint_text= ft.Text("",opacity =0,size=18, color=ft.colors.SECONDARY)
-  txt_emote= ft.Text("🕸 + 🏃‍♂️",size=65 )
+  txt_emote = ft.Text("🕸 + 🏃‍♂️",size=65,font_family="NotoEmoji" )
+  txt_debug = ft.Text("",size=18, color=ft.colors.TERTIARY)
+
   appbar = ft.AppBar(
                       title=ft.Text("Emoji Enigma",font_family="Roberto"),        
                       bgcolor=ft.colors.SURFACE_VARIANT,
         actions=[
-                ft.IconButton(ft.icons.RESTART_ALT,on_click=restart_clicked,icon_color="Green"), 
-                    
-                ]
+                ft.IconButton(ft.icons.RESTART_ALT,on_click=restart_clicked,icon_color="Green"),
+                ft.IconButton(content=ft.Text("🥇",font_family="NotoEmoji",size=16), on_click=show_high_scores, icon_color="Green"),
+
+        ]
                             
                     )
   
@@ -407,7 +466,8 @@ def IndexView(page:ft.Page, params):
             hint_btn,
             txt_hint_text,
             ft.Container(content=row_word_letters,margin=ft.margin.symmetric(0),height=130),
-            ft.Row(controls=[nav_items],alignment=ft.MainAxisAlignment.CENTER),                           
+            ft.Row(controls=[nav_items],alignment=ft.MainAxisAlignment.CENTER),
+            txt_debug,
                       
                      
            ],
@@ -419,7 +479,7 @@ def IndexView(page:ft.Page, params):
     
             )
 
-  page.update()
+  await page.update_async()
   load_dotenv()
   analytics = mymodules.analytics.Analytics(3,
                                             os.getenv('salt'),
@@ -430,8 +490,15 @@ def IndexView(page:ft.Page, params):
   analytics.StartSession(page.client_ip,page.client_user_agent, "",page.platform,page.session_id)
   analytics_match_started = False
   analytics.StartMatch("")
+  print_bug = mymodules.print_debug.PrintDebug(txt_debug,True)
+  await print_bug.print_msg(page.__str__())
+  page.on_close = page_on_close
+  page.on_connect = page_on_connect
+  page.on_disconnect = page_on_disconnect
+  page.on_error = page_on_error
+
 
   print(page)
   print("ClientID",page.client_ip)
 
-  NewGame()
+  await NewGame()

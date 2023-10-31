@@ -4,7 +4,7 @@
 #
 
 app = "emoji1"
-primary_region = "lax"
+primary_region = "sin"
 
 
 kill_signal = "SIGINT"

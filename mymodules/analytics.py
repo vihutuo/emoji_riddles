@@ -154,3 +154,14 @@ class Analytics:
         response = requests.get(url=URL, params=PARAMS, headers=h, timeout=self.timeout)
         data = response.json()
         return data
+    def get_high_scores(self,limit:int = 10, min_score: int = 0):
+        URL = f"{self.domain}/high_scores/"
+        PARAMS = {'appid': self.appid, 'min_score': min_score, 'limit': limit}
+        h = self.getheaders()
+        response = requests.get(url=URL, params=PARAMS, headers=h, timeout=self.timeout)
+        try:
+            data = response.json()
+            return data
+        except Exception as error:
+            print(error)
+            return False

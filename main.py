@@ -2,12 +2,12 @@ import flet as ft
 from views.index import IndexView
 from views.question import QuestionView
 from views.simple_view import SimpleView
-
-
-def main(page: ft.Page):
+import flet_fastapi
+import os.path
+async def main(page: ft.Page):
   page.fonts = {
      
-      #"NotoEmoji": "NotoColorEmoji-Regular.ttf",
+      "NotoEmoji": "NotoColorEmoji-Regular.ttf",
       "Roberto": "Roboto-Black.ttf"
   }
   
@@ -15,29 +15,29 @@ def main(page: ft.Page):
   page.theme_mode = "light"
   page.theme =ft.Theme(color_scheme_seed="green")
 
-
-
-  def route_change(route):
+  async def route_change(route):
     page.views.clear()
     troute = ft.TemplateRoute(page.route)
-    IndexView(page, {})
+    await IndexView(page, {})
     if troute.match("/question/:id"):
       params = {"id": troute.id}
-      QuestionView(page, params)
+      await QuestionView(page, params)
     elif troute.match("/simple_view"):
-      SimpleView(page, {})
+      await SimpleView(page, {})
 
-  def view_pop(view):
+  async def view_pop(view):
     page.views.pop()
     top_view = page.views[-1]
-    page.go(top_view.route)
+    await page.go_async(top_view.route)
 
   page.on_route_change = route_change
   page.on_view_pop = view_pop
-  page.go(page.route)
-
-
+  await page.go_async(page.route)
 
 #ft.app(target=main, assets_dir="assets",use_color_emoji=True)
-ft.app(target=main, assets_dir="assets",use_color_emoji=True,view=ft.AppView.WEB_BROWSER)
+#ft.app(target=main, assets_dir="assets",view=ft.AppView.WEB_BROWSER)
+
+app = flet_fastapi.app(main, assets_dir=os.path.abspath("assets"))
+
+
 

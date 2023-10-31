@@ -3,10 +3,10 @@ from dotenv import load_dotenv
 
 import os
 
-def QuestionView(page:ft.Page,params):
-  def letter_clicked(e):
+async def QuestionView(page:ft.Page,params):
+  async def letter_clicked(e):
     con_1.content.value = chr(ord(con_1.content.value) + 1)
-    con_1.update()
+    await con_1.update_async()
     
   question_no=params["id"] 
   txt = ft.Text(f"Question {question_no}")
@@ -23,8 +23,6 @@ def QuestionView(page:ft.Page,params):
 
          )
   txt_status = ft.Text(str, text_align=ft.TextAlign.CENTER, size=22)
-
-
   con_1 = ft.Container(
                         content=txt_letter1,
                         border=ft.border.all(2,ft.colors.AMBER_800),
@@ -34,4 +32,4 @@ def QuestionView(page:ft.Page,params):
                         on_click=letter_clicked 
                        )
   page.views.append(ft.View("/question",[appbar,txt,txt_status,btn,con_1]))
-  page.update() 
+  await page.update_async()
