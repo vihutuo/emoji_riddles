@@ -124,7 +124,7 @@ class Analytics:
         threading.Timer(0, Go).start()
 
     def UpdateMatch(self, score: int):
-        if self.session_id <= 0:
+        if self.match_id <= 0:
             return False
         URL = f"{self.domain}/matches/{self.match_id}"
         PARAMS = {'user_id': self.userid}
@@ -189,8 +189,9 @@ class Analytics:
         URL = f"{self.domain}/high_scores/"
         PARAMS = {'appid': self.appid, 'min_score': min_score, 'limit': limit}
         h = self.getheaders()
-        response = requests.get(url=URL, params=PARAMS, headers=h, timeout=self.timeout)
         try:
+            response = requests.get(url=URL, params=PARAMS, headers=h, timeout=self.timeout)
+
             data = response.json()
             return data
         except Exception as error:

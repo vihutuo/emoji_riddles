@@ -51,7 +51,7 @@ class ItemNavigator(ft.UserControl):
     if self.current<self.stop:
        self.current+=1
        self.EnableDisableButtons() 
-       print("Next Clicked")
+       #print("Next Clicked")
        self.txt_question_no.value = f"{self.current}/{self.stop}"
        await self.txt_question_no.update_async()
        await self.update_async()

@@ -14,5 +14,10 @@ class PrintDebug:
         self.is_debug = is_debug
 
     async def print_msg(self,msg: str):
-        self.txt_msg.value += GetCurrentDateTime().to_iso8601_string() + " : " + str(msg) + "\n"
-        await self.txt_msg.update_async()
+        print(msg)
+        if self.is_debug:
+            self.txt_msg.value += GetCurrentDateTime().to_iso8601_string() + " : " + str(msg) + "\n"
+            await self.txt_msg.update_async()
+
+
+

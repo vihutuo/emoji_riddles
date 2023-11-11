@@ -34,10 +34,10 @@ async def main(page: ft.Page):
   page.on_view_pop = view_pop
   await page.go_async(page.route)
 
-#ft.app(target=main, assets_dir="assets",use_color_emoji=True,view=ft.AppView.WEB_BROWSER)
+ft.app(target=main, assets_dir="assets",use_color_emoji=True,view=ft.AppView.WEB_BROWSER)
 #ft.app(target=main, assets_dir="assets",view=ft.AppView.WEB_BROWSER)
 
-app = flet_fastapi.app(main, assets_dir=os.path.abspath("assets"),use_color_emoji=True)
+#app = flet_fastapi.app(main, assets_dir=os.path.abspath("assets"),use_color_emoji=True)
 
 
 

@@ -14,7 +14,6 @@ import json
 
 async def IndexView(page:ft.Page, params):
 
-
   async def UpdateHintsRemaining(new_value):
       nonlocal hints_remaining
       hints_remaining = new_value
@@ -76,27 +75,34 @@ async def IndexView(page:ft.Page, params):
       return score
 
   def get_high_score_table(json_data):
+      #print("Drawinh HS table")
       data = json_data
+      #print(data)
       tbl = ft.DataTable(columns=[
                                 ft.DataColumn(ft.Text("Name")),
                                 ft.DataColumn(ft.Text("Score"),numeric=True),
                                 ft.DataColumn(ft.Text("Date")),
-
-                            ],heading_row_height=0,
+                            ],
+                            heading_row_height=0,
+                            column_spacing=50,
                             rows=[]
                         )
       for item in data:
           try:
-            end_time = pendulum.parse(item["end_time"]).to_formatted_date_string()
+            end_time = pendulum.parse(item["end_time"]).format("DD MMM")
           except Exception:
+              print("Error time")
               end_time = ""
+          try:
+              tbl.rows.append(ft.DataRow(
+                           cells=[
+                                ft.DataCell(ft.Text(item["player_name"])),
+                                ft.DataCell(ft.Text(item["score"])),
+                                ft.DataCell(ft.Text(str(end_time))),
+                                ]))
+          except Exception as error:
+              print(str(error))
 
-          tbl.rows.append(ft.DataRow(
-                       cells=[
-                            ft.DataCell(ft.Text(item["player_name"])),
-                            ft.DataCell(ft.Text(item["score"])),
-                            ft.DataCell(ft.Text(str(end_time))),
-                            ]))
       return tbl
 
   async def page_on_connect(e):
@@ -108,11 +114,13 @@ async def IndexView(page:ft.Page, params):
       print("Session disconnect")
 
   async def page_on_close(e):
+      pass
       #await SaveAllData()
-      await print_bug.print_msg("Session Close")
+      #await print_bug.print_msg("Session Close")
 
   async def page_on_error(e):
       await print_bug.print_msg(str(e))
+      #await page.update_async()
 
   async def reset_save_data():
       analytics.userid = ""
@@ -160,7 +168,7 @@ async def IndexView(page:ft.Page, params):
   async def SaveAllData():
 
         data = lst_py_user_emoji_items.model_dump()
-        print("Data Saved")
+       # print("Data Saved")
         await page.client_storage.set_async("lshss.emoji.user_emoji_items", data)
         await SavePlayerName()
         await SaveUserId()
@@ -192,7 +200,7 @@ async def IndexView(page:ft.Page, params):
 
   async def load_user_id():
       if await page.client_storage.contains_key_async("lshss.emoji.user_id"):
-          print("Loading userid")
+         # print("Loading userid")
           try :
               analytics.userid = await page.client_storage.get_async("lshss.emoji.user_id")
           except Exception as error:
@@ -295,7 +303,7 @@ async def IndexView(page:ft.Page, params):
   async def disable_word_letter(letter):
       ue = get_current_user_emoji_item()
       if ue.is_complete:
-          print("Complete")
+          #print("Complete")
           return
       for x in row_word_letters.controls:
           if x.text == letter and not x.disabled:
@@ -409,7 +417,7 @@ async def IndexView(page:ft.Page, params):
           user_emoji_items[selected_ind].SetWordLetters(rnd_word)
       
     rnd_word = user_emoji_items[selected_ind].word_letters
-    print(rnd_word)
+    #print(rnd_word)
     for i in range(len(rnd_word)):
         btn_1 = ft.OutlinedButton(rnd_word[i],
                             width=40,
@@ -499,27 +507,26 @@ async def IndexView(page:ft.Page, params):
 
 
   async def show_high_scores(e):
-      e.control.disabled=True
-      await e.control.update_async()
-      data = analytics.get_high_scores(10,0)
-      #await print_bug.print_msg(data)
-      async def close_dlg(e):
-          dlg_modal.open = False
-          await page.update_async()
-      dlg_modal = ft.AlertDialog(
-          modal=True,
-          title=ft.Text("High Scores"),
-          content=get_high_score_table(data),
-          actions=[
-              ft.TextButton("OK", on_click=close_dlg),
-          ],
-          actions_alignment=ft.MainAxisAlignment.CENTER,
-      )
-      page.dialog = dlg_modal
-      dlg_modal.open = True
-      e.control.disabled = False
-      await page.update_async()
 
+          data = analytics.get_high_scores(10,0)
+          #await print_bug.print_msg(data)
+          async def close_dlg(e):
+              dlg_modal.open = False
+              await page.update_async()
+          dlg_modal = ft.AlertDialog(
+              modal=True,
+              title=ft.Text("High Scores"),
+              content=get_high_score_table(data),
+              #content=ft.Text("hhh"),
+              actions=[
+                  ft.TextButton("OK", on_click=close_dlg),
+              ],
+              actions_alignment=ft.MainAxisAlignment.CENTER,
+          )
+          page.dialog = dlg_modal
+          dlg_modal.open = True
+
+          await page.update_async()
 
 
   async def NewGame():
@@ -547,7 +554,7 @@ async def IndexView(page:ft.Page, params):
     txt_hint_text.value = hint
 
     #txt_hint_text.update()
-    print("Correct Answer",correct_answer)
+    #print("Correct Answer",correct_answer)
     await UpdateScore()
     await page.update_async()
     
@@ -675,13 +682,13 @@ async def IndexView(page:ft.Page, params):
   analytics_match_started = False
   if analytics.match_id <= 0:
      analytics.StartMatch("")
-  print_bug = mymodules.print_debug.PrintDebug(txt_debug,True)
+  print_bug = mymodules.print_debug.PrintDebug(txt_debug,False)
   #await print_bug.print_msg(page.__str__())
   page.on_close = page_on_close
   page.on_connect = page_on_connect
   page.on_disconnect = page_on_disconnect
   page.on_error = page_on_error
-  #print(page)
-  print("ClientID",page.client_ip)
+  print(page)
+  #print("ClientID",page.client_ip)
 
   await NewGame()
