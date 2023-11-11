@@ -101,7 +101,6 @@ def IndexView(page, params):
         actions_alignment=ft.MainAxisAlignment.END,
         on_dismiss=restart,
     )
-
   
   img_1 = ft.Image(src="", width=300)
   txt_msg = ft.Text("")

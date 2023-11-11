@@ -27,7 +27,10 @@ class ItemNavigator(ft.UserControl):
                             
                            )
     
-      
+  def move_to_to_beginning(self):
+      self.current = 0
+      self.EnableDisableButtons()
+
   def EnableDisableButtons(self):
     self.btn_previous.disabled = False
     self.btn_next.disabled = False
