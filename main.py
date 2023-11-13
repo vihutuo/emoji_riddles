@@ -4,6 +4,7 @@ from views.question import QuestionView
 from views.simple_view import SimpleView
 import flet_fastapi
 import os.path
+from dotenv import load_dotenv
 async def main(page: ft.Page):
   page.fonts = {
      
@@ -11,7 +12,7 @@ async def main(page: ft.Page):
      # "Roberto": "Roboto-Black.ttf"
   }
   
-  page.title = "Emoji Riddles"
+  page.title = "Emoji Enigma"
   page.theme_mode = "light"
   page.theme =ft.Theme(color_scheme_seed="green")
 
@@ -34,10 +35,14 @@ async def main(page: ft.Page):
   page.on_view_pop = view_pop
   await page.go_async(page.route)
 
-ft.app(target=main, assets_dir="assets",use_color_emoji=True,view=ft.AppView.WEB_BROWSER)
-#ft.app(target=main, assets_dir="assets",view=ft.AppView.WEB_BROWSER)
+load_dotenv()
 
-#app = flet_fastapi.app(main, assets_dir=os.path.abspath("assets"),use_color_emoji=True)
+if os.getenv('uvicorn') == "0":
+    ft.app(target=main, assets_dir="assets", use_color_emoji=True, view=ft.AppView.WEB_BROWSER)
+    # ft.app(target=main, assets_dir="assets",view=ft.AppView.WEB_BROWSER)
+else:
+    app = flet_fastapi.app(main, assets_dir=os.path.abspath("assets"), use_color_emoji=True)
+
 
 
 

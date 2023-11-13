@@ -1,9 +1,9 @@
 {
-  "name": "Emoji Riddles",
-  "short_name": "Emoji Riddles",
+  "name": "Emoji Enigma",
+  "short_name": "Emoji Enigma",
   "start_url": ".",
   "display": "standalone",
-  "description": "Emoji Riddles by LSHSS", 
+  "description": "Emoji Enigma by LSHSS",
   "icons": [
     {
       "src": "icons/icon-192.png",

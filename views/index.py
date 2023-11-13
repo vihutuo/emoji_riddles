@@ -41,6 +41,9 @@ async def IndexView(page:ft.Page, params):
   async def player_name_clicked(e):
       txt_name = ft.Ref[ft.TextField]()
       async def close_dlg_ok(e):
+          txt_name.current.value = txt_name.current.value.strip()
+          if len(txt_name.current.value)== 0 :
+              return
           await update_player_name(txt_name.current.value)
           dlg_modal.open = False
           await page.update_async()
@@ -87,6 +90,7 @@ async def IndexView(page:ft.Page, params):
                             column_spacing=50,
                             rows=[]
                         )
+
       for item in data:
           try:
             end_time = pendulum.parse(item["end_time"]).format("DD MMM")
@@ -94,7 +98,11 @@ async def IndexView(page:ft.Page, params):
               print("Error time")
               end_time = ""
           try:
-              tbl.rows.append(ft.DataRow(
+              if analytics.userid == item["id"]:
+                  c = ft.colors.SECONDARY_CONTAINER
+              else:
+                  c = ft.colors.TRANSPARENT
+              tbl.rows.append(ft.DataRow(color=c,
                            cells=[
                                 ft.DataCell(ft.Text(item["player_name"])),
                                 ft.DataCell(ft.Text(item["score"])),
@@ -364,6 +372,9 @@ async def IndexView(page:ft.Page, params):
        x.style.bgcolor = ft.colors.PRIMARY
        await x.update_async()
     await SaveAllData()
+
+    #if GetScore() == 2 :
+    #        await show_high_scores(None)
     #GameOver()     
      
   async def return_user_letter(letter_ctrl):
