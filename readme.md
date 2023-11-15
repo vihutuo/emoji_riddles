@@ -1,5 +1,5 @@
 Emoji Enigma was built as a class presentation project of Little Star Higher Secondary School, Dimapur by students of Class 12.
-The following students worked on the project along with teacher Sir Vihutuo
+The following students worked on the project along with teacher Vihutuo
 i) Aditya
 ii) Kussam
 
