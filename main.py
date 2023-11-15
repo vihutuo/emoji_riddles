@@ -7,8 +7,7 @@ import os.path
 from dotenv import load_dotenv
 async def main(page: ft.Page):
   page.fonts = {
-     
-      #"NotoEmoji": "NotoColorEmoji-Regular.ttf",
+     #"NotoEmoji": "NotoColorEmoji-Regular.ttf",
      # "Roberto": "Roboto-Black.ttf"
   }
   
